@@ -1,25 +1,24 @@
-# Etapa 1: Build
+# Etapa 1: construir React
 FROM node:20-alpine AS build
 
 WORKDIR /app
-
 COPY package*.json ./
 RUN npm install
 
 COPY . .
+
+# ← Agrega esto:
+ENV NODE_OPTIONS=--openssl-legacy-provider
+
 RUN npm run build
 
-# Etapa 2: Servir con Nginx
-FROM nginx:alpine
+# Etapa 2: servir usando 'serve'
+FROM node:20-alpine
 
-# Elimina configuración default de nginx
-RUN rm -rf /usr/share/nginx/html/*
+WORKDIR /app
+RUN npm install -g serve
 
-# Copia el build al directorio público de nginx
-COPY --from=build /app/build /usr/share/nginx/html
+COPY --from=build /app/build ./build
 
-# Copia config opcional de nginx (no obligatorio)
-# COPY nginx.conf /etc/nginx/nginx.conf
-
-EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+EXPOSE 3000
+CMD ["serve", "-s", "build", "-l", "3000"]
