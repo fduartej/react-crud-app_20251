@@ -1,0 +1,4 @@
+# Ignore the build output
+node_modules/
+
+build/
